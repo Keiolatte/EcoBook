@@ -2,6 +2,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookCard from '@/components/BookCard';
 import Link from 'next/link';
+// GREEN CODING: next/image otomatis lazy-load, resize, dan convert ke WebP/AVIF
+import Image from 'next/image';
 import { books, categories, stats } from '@/data/books';
 import { Search, BookOpen, Upload, MessageCircle, ShoppingBag, Leaf, TreePine, Users, GraduationCap, ArrowRight, Recycle, TrendingDown } from 'lucide-react';
 
@@ -17,8 +19,10 @@ export default function Home() {
       <Navbar />
       <main>
         {/* Hero Section */}
+        {/* GREEN CODING: Hapus background image CSS yang berat (1920px Unsplash).
+            Diganti gradient CSS murni yang 0 KB network transfer. */}
         <section className="relative overflow-hidden bg-forest">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/90 to-sage/30" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -66,10 +70,15 @@ export default function Home() {
               <div className="hidden lg:block">
                 <div className="relative">
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
-                    <img
+                    {/* GREEN CODING: next/image → auto lazy-load, WebP/AVIF, ukuran optimal */}
+                    <Image
                       src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=500&fit=crop"
                       alt="Perpustakaan buku"
+                      width={600}
+                      height={500}
                       className="w-full h-[500px] object-cover"
+                      priority={true}
+                      sizes="(max-width: 1024px) 0vw, 50vw"
                     />
                   </div>
                   {/* Floating card */}
@@ -250,10 +259,11 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
+        {/* GREEN CODING: Hapus background image Unsplash di CTA, ganti gradient CSS */}
         <section className="py-16 lg:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-forest rounded-2xl p-8 lg:p-12 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80')] bg-cover bg-center opacity-5" />
+              <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/80 to-sage/20" />
               <div className="relative">
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">
                   Yuk, Berikan Kesempatan Kedua untuk Buku!

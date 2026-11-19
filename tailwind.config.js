@@ -17,8 +17,10 @@ module.exports = {
         'muted': '#68736C',
         'border': '#E3E7E1',
       },
+      // GREEN CODING: Font dikelola oleh next/font di layout.tsx (self-hosted, subset)
+      // Menggunakan CSS variable dari next/font sebagai fallback
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-plus-jakarta)', 'system-ui', 'sans-serif'],
       },
     },
   },

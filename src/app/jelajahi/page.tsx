@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookCard from '@/components/BookCard';
+import Image from 'next/image';
 import { books, categories, stats } from '@/data/books';
-import { Search, Filter, ChevronDown, Leaf, BookOpen, TreePine } from 'lucide-react';
+import { Search, ChevronDown, Leaf, BookOpen, TreePine } from 'lucide-react';
 
 function formatNumber(num: number): string {
   return new Intl.NumberFormat('id-ID').format(num);
@@ -18,11 +19,17 @@ const sortOptions = [
   { value: 'price-high', label: 'Harga Tertinggi' },
 ];
 
+// GREEN CODING: Jumlah buku per halaman untuk pagination.
+// Mengurangi jumlah DOM nodes dan gambar yang di-render sekaligus.
+const BOOKS_PER_PAGE = 8;
+
 export default function JelajahiPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [selectedCondition, setSelectedCondition] = useState('Semua');
   const [sortBy, setSortBy] = useState('newest');
+  // GREEN CODING: Pagination — tampilkan buku secara bertahap
+  const [visibleCount, setVisibleCount] = useState(BOOKS_PER_PAGE);
 
   const filteredBooks = useMemo(() => {
     let result = [...books];
@@ -59,13 +66,27 @@ export default function JelajahiPage() {
     return result;
   }, [searchQuery, selectedCategory, selectedCondition, sortBy]);
 
+  // GREEN CODING: Hanya render buku yang terlihat
+  const visibleBooks = useMemo(() => {
+    return filteredBooks.slice(0, visibleCount);
+  }, [filteredBooks, visibleCount]);
+
+  const hasMore = visibleCount < filteredBooks.length;
+
+  // GREEN CODING: Reset pagination saat filter berubah
+  const handleFilterChange = (setter: (v: string) => void, value: string) => {
+    setter(value);
+    setVisibleCount(BOOKS_PER_PAGE);
+  };
+
   return (
     <>
       <Navbar />
       <main>
         {/* Hero */}
+        {/* GREEN CODING: Hapus background image Unsplash, ganti CSS gradient */}
         <section className="bg-forest relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/90 to-sage/30" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               <div>
@@ -88,10 +109,15 @@ export default function JelajahiPage() {
               </div>
               <div className="hidden lg:block">
                 <div className="rounded-2xl overflow-hidden shadow-2xl">
-                  <img
+                  {/* GREEN CODING: next/image → auto lazy-load, WebP/AVIF, ukuran optimal */}
+                  <Image
                     src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=350&fit=crop"
                     alt="Buku-buku"
+                    width={500}
+                    height={350}
                     className="w-full h-[350px] object-cover"
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 0vw, 50vw"
                   />
                 </div>
               </div>
@@ -110,7 +136,7 @@ export default function JelajahiPage() {
                     type="text"
                     placeholder="Cari buku yang kamu cari di sini..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(BOOKS_PER_PAGE); }}
                     className="w-full pl-12 pr-4 py-3 bg-white rounded-lg text-sm text-charcoal placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-sage"
                   />
                 </div>
@@ -129,7 +155,7 @@ export default function JelajahiPage() {
               <h3 className="text-sm font-semibold text-charcoal mb-3">Jelajahi Berdasarkan Kategori</h3>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setSelectedCategory('Semua')}
+                  onClick={() => handleFilterChange(setSelectedCategory, 'Semua')}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     selectedCategory === 'Semua'
                       ? 'bg-forest text-white'
@@ -141,7 +167,7 @@ export default function JelajahiPage() {
                 {categories.map((cat) => (
                   <button
                     key={cat.name}
-                    onClick={() => setSelectedCategory(cat.name)}
+                    onClick={() => handleFilterChange(setSelectedCategory, cat.name)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       selectedCategory === cat.name
                         ? 'bg-forest text-white'
@@ -162,13 +188,13 @@ export default function JelajahiPage() {
             {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <p className="text-sm text-muted">
-                Menampilkan <strong className="text-charcoal">{filteredBooks.length}</strong> buku
+                Menampilkan <strong className="text-charcoal">{visibleBooks.length}</strong> dari <strong className="text-charcoal">{filteredBooks.length}</strong> buku
               </p>
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <select
                     value={selectedCondition}
-                    onChange={(e) => setSelectedCondition(e.target.value)}
+                    onChange={(e) => handleFilterChange(setSelectedCondition, e.target.value)}
                     className="appearance-none bg-white border border-border rounded-lg px-4 py-2.5 pr-10 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-sage cursor-pointer"
                   >
                     {conditions.map((c) => (
@@ -180,7 +206,7 @@ export default function JelajahiPage() {
                 <div className="relative">
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
                     className="appearance-none bg-white border border-border rounded-lg px-4 py-2.5 pr-10 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-sage cursor-pointer"
                   >
                     {sortOptions.map((opt) => (
@@ -193,12 +219,25 @@ export default function JelajahiPage() {
             </div>
 
             {/* Books Grid */}
-            {filteredBooks.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {filteredBooks.map((book) => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
+            {visibleBooks.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                  {visibleBooks.map((book) => (
+                    <BookCard key={book.id} book={book} />
+                  ))}
+                </div>
+                {/* GREEN CODING: "Tampilkan Lebih Banyak" button alih-alih render semua sekaligus */}
+                {hasMore && (
+                  <div className="text-center mt-8">
+                    <button
+                      onClick={() => setVisibleCount((prev) => prev + BOOKS_PER_PAGE)}
+                      className="px-6 py-3 bg-forest text-white font-semibold rounded-lg hover:bg-forest/90 transition-colors text-sm"
+                    >
+                      Tampilkan Lebih Banyak ({filteredBooks.length - visibleCount} tersisa)
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-offwhite rounded-full flex items-center justify-center mx-auto mb-4">
@@ -216,10 +255,15 @@ export default function JelajahiPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="rounded-2xl overflow-hidden shadow-lg">
-                <img
+                {/* GREEN CODING: next/image + loading="lazy" */}
+                <Image
                   src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop"
                   alt="Hutan hijau"
+                  width={600}
+                  height={400}
                   className="w-full h-[400px] object-cover"
+                  loading="lazy"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="bg-forest p-6 text-white">
                   <div className="flex items-center gap-3">
@@ -261,10 +305,11 @@ export default function JelajahiPage() {
         </section>
 
         {/* CTA */}
+        {/* GREEN CODING: Hapus background image Unsplash, ganti CSS gradient */}
         <section className="py-16 lg:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-forest rounded-2xl p-8 lg:p-12 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80')] bg-cover bg-center opacity-5" />
+              <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/80 to-sage/20" />
               <div className="relative">
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">
                   Yuk, Berikan Kesempatan Kedua untuk Buku!

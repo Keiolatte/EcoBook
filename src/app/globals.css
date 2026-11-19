@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+/* GREEN CODING: Font dimuat via next/font di layout.tsx, bukan @import CSS.
+   @import CSS bersifat render-blocking dan memuat SEMUA weight (200-800).
+   next/font hanya memuat weight yang dipakai + self-hosted = lebih hemat bandwidth. */
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   background-color: #F8F7F2;
   color: #252B27;
 }

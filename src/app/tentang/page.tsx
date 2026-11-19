@@ -1,5 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+// GREEN CODING: next/image untuk optimasi gambar otomatis
+import Image from 'next/image';
 import { Leaf, Users, Target, Heart, BookOpen, TreePine, GraduationCap, Recycle } from 'lucide-react';
 import { stats } from '@/data/books';
 
@@ -13,8 +15,9 @@ export default function TentangPage() {
       <Navbar />
       <main>
         {/* Hero */}
+        {/* GREEN CODING: Hapus background image Unsplash (1920px), ganti CSS gradient */}
         <section className="bg-forest relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/90 to-sage/30" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 mb-6">
               <Leaf className="w-4 h-4 text-sage" />
@@ -46,10 +49,15 @@ export default function TentangPage() {
                 </p>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-lg">
-                <img
+                {/* GREEN CODING: next/image → auto lazy-load, WebP/AVIF, ukuran optimal */}
+                <Image
                   src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600&h=450&fit=crop"
                   alt="Perpustakaan"
+                  width={600}
+                  height={450}
                   className="w-full h-[450px] object-cover"
+                  loading="lazy"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
             </div>
@@ -159,10 +167,11 @@ export default function TentangPage() {
         </section>
 
         {/* CTA */}
+        {/* GREEN CODING: Hapus background image Unsplash, ganti CSS gradient */}
         <section className="py-16 lg:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-forest rounded-2xl p-8 lg:p-12 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80')] bg-cover bg-center opacity-5" />
+              <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/80 to-sage/20" />
               <div className="relative">
                 <Heart className="w-10 h-10 text-sage mx-auto mb-4" />
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+// GREEN CODING: next/image → auto lazy-load, format WebP/AVIF, ukuran optimal
+import Image from 'next/image';
 import { Book } from '@/data/books';
 
 function formatPrice(price: number): string {
@@ -26,10 +28,18 @@ export default function BookCard({ book }: { book: Book }) {
       <div className="bg-white rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-offwhite">
-          <img
+          {/* GREEN CODING: next/image otomatis:
+              - lazy loading (hanya load saat masuk viewport)
+              - konversi ke WebP/AVIF (50-70% lebih kecil dari JPEG)
+              - responsive srcset (device tidak load gambar lebih besar dari layarnya)
+              - placeholder blur bisa ditambahkan untuk UX */}
+          <Image
             src={book.image}
             alt={book.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
           <div className="absolute top-3 left-3">
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${getConditionColor(book.condition)}`}>

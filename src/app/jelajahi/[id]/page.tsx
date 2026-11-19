@@ -2,6 +2,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookCard from '@/components/BookCard';
 import Link from 'next/link';
+// GREEN CODING: next/image untuk optimasi gambar otomatis
+import Image from 'next/image';
 import { books } from '@/data/books';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Heart, Share2, MessageCircle, MapPin, Shield, Truck, BookOpen } from 'lucide-react';
@@ -61,11 +63,16 @@ export default function BookDetailPage({ params }: { params: { id: string } }) {
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
               {/* Book Image */}
               <div className="bg-white rounded-2xl border border-border p-6 lg:p-8">
-                <div className="aspect-[3/4] rounded-xl overflow-hidden bg-offwhite">
-                  <img
+                <div className="aspect-[3/4] rounded-xl overflow-hidden bg-offwhite relative">
+                  {/* GREEN CODING: next/image → auto lazy-load, WebP/AVIF, ukuran optimal
+                      priority=true karena ini gambar utama (LCP - Largest Contentful Paint) */}
+                  <Image
                     src={book.image}
                     alt={book.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    priority={true}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                   />
                 </div>
               </div>
